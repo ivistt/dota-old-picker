@@ -3,45 +3,314 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Dota 2 — Hero Challenge Picker</title>
+  <title>Dota 2</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="app">
 
-  <!-- ── Header ── -->
-  <header>
-    <div class="logo">Dota 2</div>
-    <h1>Hero Challenge</h1>
-    <div class="view-toggle">
-      <button class="toggle-btn active" id="btn-carousel" onclick="setView('carousel')">
-        <svg viewBox="0 0 16 16">
-          <rect x="1" y="4" width="4" height="8"/>
-          <rect x="6" y="2" width="5" height="12"/>
-          <rect x="12" y="4" width="3" height="8" opacity="0.45"/>
-        </svg>
-        Carousel
-      </button>
-      <button class="toggle-btn" id="btn-grid" onclick="setView('grid')">
-        <svg viewBox="0 0 16 16">
-          <rect x="1" y="1" width="6" height="6"/>
-          <rect x="9" y="1" width="6" height="6"/>
-          <rect x="1" y="9" width="6" height="6"/>
-          <rect x="9" y="9" width="6" height="6"/>
-        </svg>
-        Grid View
-      </button>
-      <button class="quiz-open-btn" onclick="openQuiz()">
-        <svg viewBox="0 0 16 16">
-          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
-          <text x="8" y="12" text-anchor="middle" font-size="9" font-weight="bold" fill="currentColor">?</text>
-        </svg>
-        <span>Quiz</span>
-      </button>
+<!-- ══════════════════════════════════════════
+     SCREEN: MAIN (home)
+══════════════════════════════════════════ -->
+<div id="screen-main" class="screen active">
+
+  <!-- Top navbar -->
+  <nav class="d2-nav">
+    <div class="d2-nav-logo">
+      <img src="./images/dota2_logo.png" alt="Dota 2" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="d2-nav-logo-text" style="display:none">DOTA 2</span>
     </div>
-  </header>
+    <div class="d2-nav-links">
+      <button class="d2-nav-btn active" onclick="goScreen('main','today')">TODAY</button>
+      <button class="d2-nav-btn" onclick="goScreen('play')">PLAY</button>
+      <button class="d2-nav-btn" onclick="">WATCH</button>
+      <button class="d2-nav-btn" onclick="">LEARN</button>
+      <button class="d2-nav-btn" onclick="">TEAM</button>
+    </div>
+    <div class="d2-nav-right">
+      <div class="d2-nav-user">
+        <div class="d2-nav-avatar">
+          <img src="./images/avatar.png" alt="" onerror="this.style.display='none'">
+        </div>
+        <span class="d2-nav-username">Player</span>
+      </div>
+    </div>
+  </nav>
 
-  <!-- ── Filter bar ── -->
+  <!-- Main content -->
+  <div class="d2-main-content">
+
+    <!-- LEFT COLUMN -->
+    <div class="d2-left-col">
+
+      <!-- Player card -->
+      <div class="d2-player-card">
+        <div class="d2-player-card-header">
+          <div class="d2-player-avatar-wrap">
+            <img class="d2-player-avatar" src="./images/avatar.png" alt="" onerror="this.src=''">
+            <div class="d2-player-avatar-fallback">
+              <svg viewBox="0 0 40 40"><circle cx="20" cy="15" r="8" fill="#4a5060"/><ellipse cx="20" cy="35" rx="14" ry="9" fill="#4a5060"/></svg>
+            </div>
+            <div class="d2-rank-badge">
+              <img src="./images/rank_icon.png" alt="" onerror="this.style.display='none'">
+            </div>
+          </div>
+          <div class="d2-player-info">
+            <div class="d2-player-name">Cyborgmatt</div>
+            <div class="d2-player-status">Main Menu</div>
+            <div class="d2-player-wins"><span class="d2-wins-num">0</span> <span class="d2-wins-label">WINS</span></div>
+          </div>
+          <div class="d2-player-stats-right">
+            <div class="d2-stat-row"><span class="d2-stat-label">LOSSES</span><span class="d2-stat-val">0</span></div>
+            <div class="d2-stat-row"><span class="d2-stat-label">ABANDONS</span><span class="d2-stat-val">0</span></div>
+          </div>
+        </div>
+        <div class="d2-level-bar-wrap">
+          <span class="d2-level-label">LEVEL 1</span>
+          <div class="d2-level-bar"><div class="d2-level-fill" style="width:0%"></div></div>
+          <span class="d2-xp-label">XP 0 / 1000</span>
+        </div>
+      </div>
+
+      <!-- Career Profile -->
+      <div class="d2-panel career-panel">
+        <div class="d2-panel-tabs">
+          <button class="d2-tab active">OVERVIEW</button>
+          <button class="d2-tab">GAME HISTORY</button>
+          <button class="d2-tab">HEROES PLAYED</button>
+        </div>
+
+        <div class="d2-panel-section-title">MOST SUCCESSFUL HEROES</div>
+        <div class="d2-hero-slots">
+          <div class="d2-hero-slot">
+            <div class="d2-hero-slot-inner">
+              <img src="" alt="" onerror="this.style.display='none'">
+              <div class="d2-hero-slot-icon">
+                <svg viewBox="0 0 60 80"><rect x="5" y="5" width="50" height="70" rx="3" fill="#1a1f2a" stroke="#2a3040" stroke-width="1.5"/><text x="30" y="48" text-anchor="middle" font-size="28" fill="#2a3040">?</text></svg>
+              </div>
+            </div>
+          </div>
+          <div class="d2-hero-slot">
+            <div class="d2-hero-slot-inner">
+              <div class="d2-hero-slot-icon">
+                <svg viewBox="0 0 60 80"><rect x="5" y="5" width="50" height="70" rx="3" fill="#1a1f2a" stroke="#2a3040" stroke-width="1.5"/><text x="30" y="48" text-anchor="middle" font-size="28" fill="#2a3040">?</text></svg>
+              </div>
+            </div>
+          </div>
+          <div class="d2-hero-slot">
+            <div class="d2-hero-slot-inner">
+              <div class="d2-hero-slot-icon">
+                <svg viewBox="0 0 60 80"><rect x="5" y="5" width="50" height="70" rx="3" fill="#1a1f2a" stroke="#2a3040" stroke-width="1.5"/><text x="30" y="48" text-anchor="middle" font-size="28" fill="#2a3040">?</text></svg>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="d2-two-col">
+          <!-- Commendations -->
+          <div>
+            <div class="d2-panel-section-title">COMMENDATIONS</div>
+            <div class="d2-commendations">
+              <div class="d2-commend-item">
+                <div class="d2-commend-icon friendly">♥</div>
+                <div class="d2-commend-num">3</div>
+                <div class="d2-commend-label">Friendly</div>
+              </div>
+              <div class="d2-commend-item">
+                <div class="d2-commend-icon forgiving">✦</div>
+                <div class="d2-commend-num">3</div>
+                <div class="d2-commend-label">Forgiving</div>
+              </div>
+              <div class="d2-commend-item">
+                <div class="d2-commend-icon teaching">✎</div>
+                <div class="d2-commend-num">3</div>
+                <div class="d2-commend-label">Teaching</div>
+              </div>
+              <div class="d2-commend-item">
+                <div class="d2-commend-icon leadership">★</div>
+                <div class="d2-commend-num">3</div>
+                <div class="d2-commend-label">Leadership</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Recent games -->
+          <div>
+            <div class="d2-panel-section-title">MOST RECENT GAMES</div>
+            <div class="d2-recent-games">
+              <div class="d2-game-row">
+                <div class="d2-game-hero-icon"><svg viewBox="0 0 32 32"><rect width="32" height="32" fill="#1a1f2a"/></svg></div>
+                <span class="d2-game-hero-name">Ogre Magi</span>
+                <span class="d2-game-date">07/07/11</span>
+              </div>
+              <div class="d2-game-row">
+                <div class="d2-game-hero-icon"><svg viewBox="0 0 32 32"><rect width="32" height="32" fill="#1a1f2a"/></svg></div>
+                <span class="d2-game-hero-name">Treant Protector</span>
+                <span class="d2-game-date">07/07/11</span>
+              </div>
+              <div class="d2-game-row">
+                <div class="d2-game-hero-icon"><svg viewBox="0 0 32 32"><rect width="32" height="32" fill="#1a1f2a"/></svg></div>
+                <span class="d2-game-hero-name">Nature's Prophet</span>
+                <span class="d2-game-date">07/07/11</span>
+              </div>
+              <div class="d2-game-row">
+                <div class="d2-game-hero-icon"><svg viewBox="0 0 32 32"><rect width="32" height="32" fill="#1a1f2a"/></svg></div>
+                <span class="d2-game-hero-name">Lifestealer</span>
+                <span class="d2-game-date">07/07/11</span>
+              </div>
+              <div class="d2-game-row">
+                <div class="d2-game-hero-icon"><svg viewBox="0 0 32 32"><rect width="32" height="32" fill="#1a1f2a"/></svg></div>
+                <span class="d2-game-hero-name">Death Prophet</span>
+                <span class="d2-game-date">07/07/11</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /left col -->
+
+    <!-- CENTER (news/today feed — пустой, под контент) -->
+    <div class="d2-center-col">
+      <div class="d2-news-placeholder">
+        <!-- Сюда вставишь картинки / новости -->
+        <div class="d2-news-gradient"></div>
+      </div>
+    </div>
+
+    <!-- RIGHT COLUMN -->
+    <div class="d2-right-col">
+
+      <!-- Battleflag / mini player card -->
+      <div class="d2-mini-card">
+        <div class="d2-mini-avatar">
+          <img src="./images/avatar.png" alt="" onerror="this.style.display='none'">
+          <div class="d2-mini-avatar-fallback">
+            <svg viewBox="0 0 32 32"><circle cx="16" cy="11" r="6" fill="#4a5060"/><ellipse cx="16" cy="27" rx="11" ry="7" fill="#4a5060"/></svg>
+          </div>
+        </div>
+        <div class="d2-mini-info">
+          <div class="d2-mini-name">Cyborgmatt</div>
+          <div class="d2-mini-status">Main Menu</div>
+        </div>
+        <div class="d2-mini-wins"><span>WINS</span><strong>0</strong></div>
+        <div class="d2-battleflag">BATTLEFLAG: 1</div>
+        <div class="d2-battlepoints">Battle Points: <span>0 / 1000</span></div>
+      </div>
+
+      <!-- Chat -->
+      <div class="d2-panel chat-panel">
+        <div class="d2-panel-header-label">CHAT</div>
+        <div class="d2-chat-tabs">
+          <button class="d2-chat-tab">Friendless</button>
+          <button class="d2-chat-tab active">Team Cake</button>
+          <button class="d2-chat-tab">Lobby ★</button>
+          <button class="d2-chat-tab">Escape ★</button>
+          <button class="d2-chat-tab">Team</button>
+        </div>
+        <div class="d2-chat-body">
+          <div class="d2-chat-msg"><span class="d2-chat-user">Cyborgmatt:</span></div>
+        </div>
+        <div class="d2-chat-input-wrap">
+          <input class="d2-chat-input" type="text" placeholder="">
+        </div>
+      </div>
+
+      <!-- Friends -->
+      <div class="d2-panel friends-panel">
+        <div class="d2-panel-header-label">FRIENDS</div>
+        <div class="d2-friends-group-label">PLAYING DOTA</div>
+        <div class="d2-friends-list">
+          <div class="d2-friend playing">
+            <div class="d2-friend-avatar"></div>
+            <div class="d2-friend-info">
+              <div class="d2-friend-name">Slendoor</div>
+              <div class="d2-friend-status">Spectating a Game</div>
+            </div>
+          </div>
+          <div class="d2-friend playing">
+            <div class="d2-friend-avatar"></div>
+            <div class="d2-friend-info">
+              <div class="d2-friend-name">elicio</div>
+              <div class="d2-friend-status">Main Menu</div>
+            </div>
+          </div>
+        </div>
+        <div class="d2-friends-group-label">ONLINE</div>
+        <div class="d2-friends-list online-list">
+          <div class="d2-friend online" onclick="">
+            <div class="d2-friend-avatar"></div>
+            <div class="d2-friend-info">
+              <div class="d2-friend-name">TOR-Merhaba</div>
+              <div class="d2-friend-status">Online</div>
+            </div>
+          </div>
+          <div class="d2-friend online">
+            <div class="d2-friend-avatar"></div>
+            <div class="d2-friend-info">
+              <div class="d2-friend-name">z1TheRussian</div>
+              <div class="d2-friend-status">Online</div>
+            </div>
+          </div>
+          <div class="d2-friend online">
+            <div class="d2-friend-avatar"></div>
+            <div class="d2-friend-info">
+              <div class="d2-friend-name">OC-Zae</div>
+              <div class="d2-friend-status">Playing Other Game</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /right col -->
+
+  </div><!-- /main content -->
+
+  <!-- Bottom bar -->
+  <div class="d2-bottom-bar">
+    <button class="d2-bottom-btn" onclick="goScreen('play')">
+      <span class="d2-bottom-icon">▶</span> PLAY DOTA
+    </button>
+    <button class="d2-bottom-btn secondary" onclick="openQuiz()">
+      <span class="d2-bottom-icon">?</span> QUIZ
+    </button>
+  </div>
+
+</div><!-- /screen-main -->
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN: PLAY (carousel + grid)
+══════════════════════════════════════════ -->
+<div id="screen-play" class="screen">
+
+  <!-- Play screen navbar -->
+  <nav class="d2-nav">
+    <div class="d2-nav-logo">
+      <img src="./images/dota2_logo.png" alt="Dota 2" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <span class="d2-nav-logo-text" style="display:none">DOTA 2</span>
+    </div>
+    <div class="d2-nav-links">
+      <button class="d2-nav-btn" onclick="goScreen('main')">TODAY</button>
+      <button class="d2-nav-btn active" onclick="goScreen('play')">PLAY</button>
+      <button class="d2-nav-btn" onclick="">WATCH</button>
+      <button class="d2-nav-btn" onclick="">LEARN</button>
+      <button class="d2-nav-btn" onclick="">TEAM</button>
+    </div>
+    <div class="d2-nav-right">
+      <div class="view-toggle">
+        <button class="toggle-btn active" id="btn-carousel" onclick="setView('carousel')">
+          <svg viewBox="0 0 16 16"><rect x="1" y="4" width="4" height="8"/><rect x="6" y="2" width="5" height="12"/><rect x="12" y="4" width="3" height="8" opacity="0.45"/></svg>
+          Carousel
+        </button>
+        <button class="toggle-btn" id="btn-grid" onclick="setView('grid')">
+          <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>
+          Grid
+        </button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Filter bar -->
   <div class="filter-bar">
     <button class="filter-btn all active" onclick="setFilter('all')">All</button>
     <button class="filter-btn str" onclick="setFilter('strength')">⚔ Strength</button>
@@ -49,15 +318,13 @@
     <button class="filter-btn int" onclick="setFilter('intelligence')">✦ Intelligence</button>
     <button class="filter-btn uni" onclick="setFilter('universal')">◈ Universal</button>
     <div class="filter-sep"></div>
-    <button class="filter-btn melee"  onclick="setFilter('melee')">⚔ Melee</button>
+    <button class="filter-btn melee" onclick="setFilter('melee')">⚔ Melee</button>
     <button class="filter-btn ranged" onclick="setFilter('ranged')">⟶ Ranged</button>
     <div class="filter-right" id="filter-count">126 heroes</div>
   </div>
 
-  <!-- ── Main ── -->
+  <!-- Main -->
   <div class="main">
-
-    <!-- Carousel view -->
     <div id="carousel-view">
       <div class="carousel-track-wrap" id="track-wrap" style="touch-action: pan-x;">
         <div class="carousel-track" id="carousel-track"></div>
@@ -67,13 +334,10 @@
         <button class="pick-btn" id="pick-btn" onclick="pickHero()">Pick Hero</button>
       </div>
     </div>
-
-    <!-- Grid view -->
     <div id="grid-view"></div>
-
   </div>
 
-  <!-- ── Challenge Panel ── -->
+  <!-- Challenge Panel -->
   <div id="challenge-panel">
     <div class="panel-header">
       <img class="panel-hero-img" id="panel-hero-img" src="" alt="">
@@ -86,23 +350,23 @@
     <div class="challenges-list" id="challenges-list"></div>
   </div>
 
-</div>
+</div><!-- /screen-play -->
 
-<!-- ── Shopkeeper's Quiz Overlay ── -->
+
+<!-- ══════════════════════════════════════════
+     QUIZ OVERLAY (поверх всего)
+══════════════════════════════════════════ -->
 <div id="quiz-overlay">
   <div class="quiz-card">
     <button class="quiz-close" onclick="closeQuiz()">✕</button>
     <div class="quiz-title">The Shopkeeper's Quiz</div>
     <div class="quiz-subtitle">Test your Dota 2 item knowledge</div>
-
     <div class="quiz-target">
       <img id="quiz-item-img" src="" alt="">
       <div class="quiz-item-name" id="quiz-item-name"></div>
     </div>
-
     <div class="quiz-components" id="quiz-components"></div>
     <div class="quiz-choices" id="quiz-choices"></div>
-
     <div class="quiz-hud">
       <div class="quiz-hud-item">
         <div class="quiz-hud-label">Guesses Left</div>
@@ -117,10 +381,18 @@
   </div>
 </div>
 
-<!-- Data & Logic -->
 <script src="heroes.js"></script>
 <script src="challenges.js"></script>
 <script src="quiz.js"></script>
 <script src="app.js"></script>
+<script>
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'play') {
+    setTimeout(() => { buildCarousel(); updateCarousel(); }, 50);
+  }
+}
+</script>
 </body>
 </html>
