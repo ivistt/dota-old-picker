@@ -272,10 +272,14 @@ h1 {
   height: 100%; overflow-y: auto;
   padding: 16px 24px 80px; display: none;
 }
-#grid-view::-webkit-scrollbar { width: 4px; }
-#grid-view::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-.grid-section { margin-bottom: 22px; }
+.grid-sections-wrap {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px 24px;
+}
+
+.grid-section { margin-bottom: 0; }
 .grid-section-title {
   font-family: 'Rajdhani', sans-serif;
   font-size: 11px; font-weight: 600; letter-spacing: 4px;
@@ -441,4 +445,11 @@ h1 {
 @media (hover: none) {
   .carousel-track-wrap { -webkit-tap-highlight-color: transparent; }
   .hero-card { -webkit-tap-highlight-color: transparent; }
+}
+
+
+@media (max-width: 768px) {
+  .grid-sections-wrap {
+    grid-template-columns: 1fr;
+  }
 }

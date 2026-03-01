@@ -2,7 +2,7 @@
 const IMG_PATH = './images/';
 const CARD_W   = 216;   // base card width
 const CARD_H   = 312;   // base card height
-let SPACING    = 170;   // recalculated on resize
+let SPACING    = 450;   // recalculated on resize
 let CARD_W_CUR = 216;
 let CARD_H_CUR = 312;
 const MAX_ROT  = 52;    // max rotateY degrees for far cards
@@ -58,12 +58,37 @@ function cardTransform(offset) {
   const scale   = Math.max(0.45, 1 - absOff * 0.11);
 
   // rotateY: 0 at center, grows toward MAX_ROT
-  const rotY    = Math.min(absOff * 20, MAX_ROT) * (-sign);
+ const rotY = (absOff <= 1 ? absOff * 15
+            : absOff <= 2 ? 15 + (absOff - 1) * 40
+            : Math.min(55 + (absOff - 2) * 35, 90)) * (-sign);
 
-  // X position: stacked closer together as they get further (fan effect)
-  // near cards are more spread, far ones overlap more
-  const spreadFactor = Math.max(0.55, 1 - absOff * 0.06);
-  const tx      = offset * SPACING * spreadFactor;
+  // X position:
+  // Cards at distance 1 and 2 are spaced so they don't overlap the previous card.
+  // Card at distance 3+ starts to slightly overlap card at distance 2.
+  // Each card's visible half-width at its scale: (CARD_W_CUR / 2) * scale
+  // We position edges so: pos[n] = pos[n-1] + halfWidth[n-1] + halfWidth[n] + gap
+  // For n>=3 we reduce the gap to allow slight overlap.
+  let tx;
+  if (absOff <= 0.001) {
+    tx = 0;
+  } else {
+    // Compute position for integer offsets first, then interpolate
+    const buildPos = (n) => {
+      // half-width of each card at its scale
+      const hw = (i) => (CARD_W_CUR / 2) * Math.max(0.45, 1 - i * 0.11);
+      let pos = 0;
+      for (let i = 1; i <= n; i++) {
+        const gap = i <= 2 ? 6 : -CARD_W_CUR * 0.08; // gap: positive=no overlap, negative=overlap
+        pos += hw(i - 1) + hw(i) + gap;
+      }
+      return pos;
+    };
+    const floor = Math.floor(absOff);
+    const frac  = absOff - floor;
+    const p0 = floor === 0 ? 0 : buildPos(floor);
+    const p1 = buildPos(floor + 1);
+    tx = (p0 + (p1 - p0) * frac) * sign;
+  }
 
   // Z: center card pops forward, side cards recede
   const tz      = -Math.abs(offset) * 55;
@@ -177,8 +202,8 @@ function animate() {
 
   const maxS =  0;
   const minS = -(filteredHeroes.length - 1) * SPACING;
-  if (scrollX > maxS) { scrollX = maxS; velocity *= -0.25; }
-  if (scrollX < minS) { scrollX = minS; velocity *= -0.25; }
+  if (scrollX > maxS) { scrollX = maxS; velocity *= -0.1; }
+  if (scrollX < minS) { scrollX = minS; velocity *= -0.1; }
 
   if (Math.abs(velocity) < 0.35) {
     const target = -Math.round(-scrollX / SPACING) * SPACING;
@@ -335,12 +360,17 @@ function closePanel() {
 function buildGrid() {
   const grid = document.getElementById('grid-view');
   grid.innerHTML = '';
+
+  const wrap = document.createElement('div');
+  wrap.className = 'grid-sections-wrap';
+
   const sections = [
-    { attr:'strength',    label:'⚔ Strength' },
-    { attr:'agility',     label:'🏹 Agility' },
-    { attr:'intelligence',label:'✦ Intelligence' },
-    { attr:'universal',   label:'◈ Universal' },
+    { attr:'strength',     label:'⚔ Strength' },
+    { attr:'agility',      label:'🏹 Agility' },
+    { attr:'intelligence', label:'✦ Intelligence' },
+    { attr:'universal',    label:'◈ Universal' },
   ];
+
   sections.forEach(sec => {
     const heroes = filteredHeroes.filter(h => h.attribute === sec.attr);
     if (!heroes.length) return;
@@ -362,8 +392,10 @@ function buildGrid() {
       ghGrid.appendChild(el);
     });
     section.appendChild(ghGrid);
-    grid.appendChild(section);
+    wrap.appendChild(section);
   });
+
+  grid.appendChild(wrap);
 }
 
 // ──────────────────────────────────────────────
@@ -396,8 +428,18 @@ function setView(v) {
 // ──────────────────────────────────────────────
 window.addEventListener('keydown', e => {
   if (currentView !== 'carousel') return;
-  if (e.key === 'ArrowRight') { velocity -= 50; startAnim(); }
-  if (e.key === 'ArrowLeft')  { velocity += 50; startAnim(); }
+  if (e.key === 'ArrowRight') {
+    e.preventDefault();
+    const cur = Math.round(-scrollX / SPACING);
+    const target = -Math.min(filteredHeroes.length - 1, cur + 1) * SPACING;
+    scrollX = target; velocity = 0; isAnimating = false; updateCarousel();
+  }
+  if (e.key === 'ArrowLeft') {
+    e.preventDefault();
+    const cur = Math.round(-scrollX / SPACING);
+    const target = -Math.max(0, cur - 1) * SPACING;
+    scrollX = target; velocity = 0; isAnimating = false; updateCarousel();
+  }
   if (e.key === 'Enter')      pickHero();
   if (e.key === 'Escape')     closePanel();
 });
@@ -408,12 +450,12 @@ function recalcSpacing() {
   const isSmall  = window.innerWidth <= 480;
 
   if (isSmall) {
-    CARD_W_CUR = 120;
-    CARD_H_CUR = 172;
+    CARD_W_CUR = 144;
+    CARD_H_CUR = 206;
     SPACING = Math.round(window.innerWidth / 4.2);
   } else if (isMobile) {
-    CARD_W_CUR = 150;
-    CARD_H_CUR = 215;
+    CARD_W_CUR = 240;
+    CARD_H_CUR = 344;
     SPACING = Math.round(window.innerWidth / 5.5);
   } else {
     CARD_W_CUR = CARD_W;
