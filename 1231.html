@@ -71,14 +71,14 @@ body::before {
   width: 100vw; height: 100vh;
   flex-direction: column;
   z-index: 10;
-  background:
-    radial-gradient(ellipse 80% 60% at 50% 30%, #0e1620 0%, #070a0e 55%, #030507 100%);
+  background: #000 url('https://images.gamewatcherstatic.com/image/file/4/5e/126384/Dota-2-Key-Art-1.jpg') no-repeat center center;
+  background-size: cover;
 }
 #screen-play.active { display: flex; }
 #screen-play::before {
-  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-  background:
-    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.003) 3px, rgba(255,255,255,0.003) 4px);
+  content: ""; position: fixed; inset: 0;
+  background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.88) 100%);
+  z-index: 0; pointer-events: none;
 }
 #screen-play > * { position: relative; z-index: 1; }
 
@@ -276,7 +276,6 @@ body::before {
 .hero-card.focused::after {
   content: ''; position: absolute; inset: -2px;
   border: 2px solid var(--dota-gold);
-  border-radius: 18px;
   box-shadow: 0 0 16px rgba(193,179,130,0.45);
   pointer-events: none; z-index: 20;
 }
