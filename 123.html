@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dota 2</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+  <style>
+/* ══════════════════════════════════════════
+   DESIGN TOKENS — Source 1 Cinzel Edition
+══════════════════════════════════════════ */
+:root {
+  --bg-dark:      #080808;
+  --panel-bg:     rgba(18,18,18,0.96);
+  --inner-content:#0a0a0a;
+  --dota-green:   #a8cf5c;
+  --dota-blue:    #547b92;
+  --dota-gold:    #c1b382;
+  --border-gray:  #353535;
+  --tab-inactive: #121212;
+  --active-red:   #a32b2b;
+  --str: #c0392b;
+  --agi: #27ae60;
+  --int: #2980b9;
+  --uni: #8e44ad;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  margin: 0;
+  background: #000 url('https://images.gamewatcherstatic.com/image/file/4/5e/126384/Dota-2-Key-Art-1.jpg') no-repeat center center fixed;
+  background-size: cover;
+  font-family: 'Cinzel', serif;
+  color: #b0b0b0;
+  text-transform: uppercase;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 100vh;
+  font-size: 26px;
+  letter-spacing: 0.05em;
+  overflow-x: hidden;
+}
+body::before {
+  content: "";
+  position: fixed; inset: 0;
+  background: radial-gradient(circle, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.85) 100%);
+  z-index: 1;
+}
+
+/* ══ SCREEN SYSTEM ══ */
+/* main screen: centered card like the reference */
+#screen-main {
+  display: none;
+  width: 52em;
+  flex-direction: column;
+  gap: 0.4em;
+  z-index: 10;
+  filter: drop-shadow(0 0.8em 4em rgba(0,0,0,0.95));
+  padding: 0.6em 0;
+}
+#screen-main.active { display: flex; }
+
+/* play screen: full viewport */
+#screen-play {
+  display: none;
+  position: fixed; inset: 0;
+  width: 100vw; height: 100vh;
+  flex-direction: column;
+  z-index: 10;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 30%, #0e1620 0%, #070a0e 55%, #030507 100%);
+}
+#screen-play.active { display: flex; }
+#screen-play::before {
+  content: ""; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background:
+    repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(255,255,255,0.003) 3px, rgba(255,255,255,0.003) 4px);
+}
+#screen-play > * { position: relative; z-index: 1; }
+
+/* ══════════════════════════════════════════
+   TOP MENU (shared style)
+══════════════════════════════════════════ */
+.top-menu {
+  display: flex;
+  background: linear-gradient(to bottom, #2a2a2a, #000);
+  border: 0.04em solid #333;
+  height: 1.8em;
+  align-items: center;
+  flex-shrink: 0;
+}
+.logo-text {
+  font-weight: 700; color: #fff;
+  letter-spacing: 0.3em; padding: 0 1.2em; font-size: 0.8em;
+  text-shadow: 0 0 0.4em rgba(255,255,255,0.3);
+  white-space: nowrap; flex-shrink: 0;
+}
+.menu-item {
+  padding: 0 0.9em; font-size: 0.55em; color: #888;
+  border-right: 0.04em solid #111;
+  height: 100%; display: flex; align-items: center;
+  cursor: pointer; transition: color 0.2s;
+  white-space: nowrap; user-select: none;
+}
+.menu-item:hover { color: #ccc; }
+.menu-item.active {
+  background: linear-gradient(to bottom, #7a1e1e, #2a0a0a);
+  color: #fff;
+  border-top: 0.12em solid #ff2a2a;
+  box-shadow: inset 0 0.2em 0.5em rgba(255,0,0,0.2);
+}
+/* view toggle pushed into menu right side */
+.menu-right { margin-left: auto; display: flex; align-items: center; padding-right: 0.4em; gap: 0.15em; flex-shrink: 0; }
+.view-tog-btn {
+  font-family: 'Cinzel', serif;
+  background: transparent; border: 0.04em solid #333;
+  color: #555; padding: 0.2em 0.6em; font-size: 0.38em;
+  cursor: pointer; transition: all 0.15s; text-transform: uppercase;
+  display: flex; align-items: center; gap: 0.3em; letter-spacing: 0.05em;
+}
+.view-tog-btn svg { width: 0.9em; height: 0.9em; fill: currentColor; }
+.view-tog-btn.active, .view-tog-btn:hover {
+  color: var(--dota-gold); border-color: #666; background: rgba(193,179,130,0.05);
+}
+
+/* ══════════════════════════════════════════
+   SCREEN MAIN — layout
+══════════════════════════════════════════ */
+.main-content {
+  display: grid;
+  grid-template-columns: 1.85fr 1fr;
+  gap: 0.4em;
+}
+.panel-box {
+  background: var(--panel-bg);
+  border: 0.04em solid var(--border-gray);
+  box-shadow: inset 0 0 1.5em #000;
+  display: flex; flex-direction: column; position: relative;
+}
+.close-btn {
+  position: absolute; top: 0.4em; right: 0.5em;
+  font-size: 0.4em; color: #555; cursor: pointer; z-index: 5;
+}
+.close-btn:hover { color: #aaa; }
+
+/* profile top bar */
+.profile-top-bar {
+  padding: 0.7em 0.8em;
+  background: linear-gradient(to right, #252525, transparent);
+  display: flex; justify-content: space-between; align-items: flex-start;
+  border-bottom: 0.04em solid #000; gap: 0.5em;
+}
+.user-meta { display: flex; gap: 0.5em; align-items: flex-start; }
+.avatar-img {
+  width: 3.2em; height: 3.2em;
+  border: 0.06em solid #3a3a3a;
+  background: #111 center/cover;
+  box-shadow: 0 0 0.5em rgba(0,0,0,0.5); flex-shrink: 0;
+}
+.nick-name { color: var(--dota-green); font-size: 1.1em; margin: 0; line-height: 1; font-weight: 700; }
+.sub-text { color: var(--dota-blue); font-size: 0.45em; opacity: 0.8; display: block; margin-top: 0.3em; }
+.xp-section { text-align: right; width: 11em; flex-shrink: 0; }
+.wins-text { font-size: 0.55em; margin-bottom: 0.15em; color: #999; }
+.xp-bar-bg { height: 0.45em; background: #000; border: 0.04em solid #2a2a2a; margin: 0.2em 0; }
+.xp-bar-fill { width: 42%; height: 100%; background: linear-gradient(to right, #1a4a8a, #3b8dff); box-shadow: 0 0 0.4em rgba(59,141,255,0.4); }
+
+/* tabs */
+.tabs-row { display: flex; gap: 0.1em; padding: 0.5em 0.6em 0; }
+.tab-btn {
+  font-family: 'Cinzel', serif;
+  background: var(--tab-inactive); border: 0.04em solid #222; border-bottom: none;
+  padding: 0.4em 1em; font-size: 0.45em; color: #555;
+  cursor: pointer; transition: color 0.2s; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.tab-btn:hover { color: #999; }
+.tab-btn.active {
+  background: #1a1a1a; color: #fff;
+  border-top: 0.1em solid var(--active-red);
+  box-shadow: inset 0 0.1em 0.4em rgba(163,43,43,0.3);
+}
+
+/* career body */
+.career-body {
+  background: var(--inner-content);
+  margin: 0 0.5em 0.5em 0.5em;
+  border: 0.04em solid #1a1a1a;
+  padding: 0.7em; flex-grow: 1;
+}
+.section-label { font-size: 0.4em; color: #444; border-bottom: 0.04em solid #1a1a1a; margin-bottom: 0.8em; padding-bottom: 0.2em; }
+.hero-display { display: flex; justify-content: space-around; padding: 0.4em 0 1.2em; }
+.hero-slot {
+  width: 7.5em; height: 10.5em; background: #050505;
+  border: 0.04em solid #222; box-shadow: inset 0 0 2.5em #000;
+  background-image: radial-gradient(circle at center, #111 0%, #000 100%);
+  overflow: hidden;
+}
+.hero-slot img { width: 100%; height: 100%; object-fit: cover; object-position: center top; }
+.bottom-info { display: grid; grid-template-columns: 1.4fr 1fr; gap: 0.5em; }
+.info-card { background: rgba(0,0,0,0.4); border: 0.04em solid #151515; padding: 0.5em; }
+.comm-icons { display: flex; justify-content: space-between; padding: 0.3em 0.2em; }
+.comm-unit { text-align: center; font-size: 0.35em; color: var(--dota-green); font-weight: 700; }
+.comm-num { display: block; color: #fff; font-size: 1.4em; margin-bottom: 0.1em; font-weight: 700; text-shadow: 0 0 0.3em var(--dota-green); }
+.recent-row { display: flex; justify-content: space-between; font-size: 0.38em; color: #666; padding: 0.2em 0; border-bottom: 0.04em solid #151515; }
+
+/* right col */
+.right-col { display: flex; flex-direction: column; gap: 0.4em; }
+.side-header { background: linear-gradient(to bottom, #2c2c2c, #1a1a1a); padding: 0.4em 0.8em; font-size: 0.5em; border-bottom: 0.04em solid #000; color: #aaa; flex-shrink: 0; }
+.chat-box { height: 16em; }
+.friends-box { height: 11em; overflow: hidden; }
+.friend-item { display: flex; align-items: center; gap: 0.5em; padding: 0.3em 0.6em; border-bottom: 0.04em solid #111; font-size: 0.5em; }
+.f-ava { width: 1.6em; height: 1.6em; background: #222; border: 0.04em solid #333; flex-shrink: 0; }
+.f-status { color: var(--dota-green); font-size: 0.8em; display: block; }
+
+/* bottom action bar */
+.main-bottom-bar { display: flex; gap: 0.4em; justify-content: center; padding: 0.1em 0 0; }
+.main-action-btn {
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(to bottom, #1e1e1e, #0a0a0a);
+  border: 0.04em solid var(--border-gray); color: var(--dota-gold);
+  padding: 0.4em 2em; font-size: 0.55em; letter-spacing: 0.2em;
+  cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+  clip-path: polygon(0.3em 0, calc(100% - 0.3em) 0, 100% 0.3em, 100% calc(100% - 0.3em), calc(100% - 0.3em) 100%, 0.3em 100%, 0 calc(100% - 0.3em), 0 0.3em);
+}
+.main-action-btn:hover { background: linear-gradient(to bottom, #2c2c2c, #161616); color: #fff; border-color: var(--dota-gold); }
+.main-action-btn.primary { background: linear-gradient(to bottom, #7a1e1e, #2a0a0a); border-color: #a32b2b; color: #fff; }
+.main-action-btn.primary:hover { background: linear-gradient(to bottom, #9a2a2a, #3a1010); }
+
+/* ══════════════════════════════════════════
+   SCREEN PLAY — filter bar
+══════════════════════════════════════════ */
+.play-filter-bar {
+  display: flex; align-items: center;
+  background: rgba(8,8,8,0.94);
+  border-bottom: 0.04em solid #1a1a1a;
+  padding: 0 0.3em; height: 1.5em;
+  flex-shrink: 0; overflow-x: auto; scrollbar-width: none;
+}
+.play-filter-bar::-webkit-scrollbar { display: none; }
+.filt-btn {
+  font-family: 'Cinzel', serif; background: transparent; border: none;
+  border-bottom: 0.1em solid transparent;
+  color: #555; padding: 0 0.7em; height: 100%;
+  font-size: 0.45em; letter-spacing: 0.08em; cursor: pointer; transition: all 0.2s;
+  text-transform: uppercase; white-space: nowrap; flex-shrink: 0;
+}
+.filt-btn:hover { color: #999; }
+.filt-btn.active { color: var(--dota-gold); border-bottom-color: var(--dota-gold); }
+.filt-btn.str.active  { color: var(--str); border-bottom-color: var(--str); }
+.filt-btn.agi.active  { color: var(--agi); border-bottom-color: var(--agi); }
+.filt-btn.int.active  { color: var(--int); border-bottom-color: var(--int); }
+.filt-btn.uni.active  { color: var(--uni); border-bottom-color: var(--uni); }
+.filt-sep { width: 0.04em; height: 0.7em; background: #2a2a2a; margin: 0 0.2em; flex-shrink: 0; }
+.filt-count { margin-left: auto; font-size: 0.38em; color: #3a3a3a; white-space: nowrap; padding: 0 0.5em; flex-shrink: 0; }
+
+/* ══ MAIN CAROUSEL AREA ══ */
+.play-main { flex: 1; overflow: hidden; position: relative; }
+
+#carousel-view { height: 100%; display: flex; align-items: center; position: relative; overflow: hidden; }
+.carousel-track-wrap {
+  width: 100%; height: 100%; position: relative; overflow: visible;
+  cursor: grab; perspective: 900px; perspective-origin: 50% 50%; touch-action: pan-x;
+}
+.carousel-track-wrap.dragging { cursor: grabbing; }
+.carousel-track { height: 100%; position: absolute; left: 0; top: 0; right: 0; pointer-events: none; transform-style: preserve-3d; }
+
+.hero-card {
+  position: absolute; top: 50%;
+  pointer-events: all; cursor: pointer;
+  transform-style: preserve-3d; will-change: transform, opacity; transform-origin: center center;
+}
+.card-inner { width: 100%; height: 100%; position: relative; overflow: hidden; background: transparent; }
+.hero-card.focused::after {
+  content: ''; position: absolute; inset: -2px;
+  border: 2px solid var(--dota-gold);
+  border-radius: 18px;
+  box-shadow: 0 0 16px rgba(193,179,130,0.45);
+  pointer-events: none; z-index: 20;
+}
+.card-portrait { position: absolute; top: 12%; left: 8%; right: 8%; bottom: 11%; width: 83%; height: 75%; object-fit: cover; object-position: center top; display: block; pointer-events: none; z-index: 1; }
+.card-frame { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: fill; display: block; pointer-events: none; z-index: 2; }
+.card-name { position: absolute; top: 8%; left: 11%; right: 8%; font-family: 'Cinzel', serif; font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: #ddd; text-shadow: 0 1px 5px #000, 0 0 8px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; z-index: 5; }
+.attr-badge { position: absolute; top: 4.2%; right: 5%; width: 22px; height: 22px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 700; color: #fff; border: 1px solid rgba(255,255,255,0.25); z-index: 10; }
+.attr-badge.strength     { background: var(--str); }
+.attr-badge.agility      { background: var(--agi); }
+.attr-badge.intelligence { background: var(--int); }
+.attr-badge.universal    { background: var(--uni); }
+
+.pick-btn-wrap { position: absolute; bottom: 1.2em; left: 50%; transform: translateX(-50%); pointer-events: all; z-index: 50; }
+.pick-btn {
+  font-family: 'Cinzel', serif;
+  background: linear-gradient(to bottom, #1e1e1e, #0a0a0a);
+  border: 0.04em solid var(--dota-gold); color: var(--dota-gold);
+  padding: 0.5em 2.2em; font-size: 0.5em; letter-spacing: 0.25em;
+  cursor: pointer; transition: all 0.2s; text-transform: uppercase;
+  clip-path: polygon(0.4em 0, calc(100% - 0.4em) 0, 100% 0.4em, 100% calc(100% - 0.4em), calc(100% - 0.4em) 100%, 0.4em 100%, 0 calc(100% - 0.4em), 0 0.4em);
+}
+.pick-btn:hover { background: linear-gradient(to bottom, #2c2c2c, #161616); color: #fff; }
+.scroll-hint {
+  position: absolute; bottom: 3.5em; left: 50%; transform: translateX(-50%);
+  font-size: 0.38em; letter-spacing: 0.2em; color: #3a3a3a;
+  text-transform: uppercase; pointer-events: none; transition: opacity 0.6s; white-space: nowrap;
+}
+.scroll-hint::before { content: '◄  '; }
+.scroll-hint::after  { content: '  ►'; }
+.scroll-hint.hidden  { opacity: 0; }
+
+/* ══ GRID ══ */
+#grid-view { height: 100%; overflow-y: auto; padding: 0.8em 1em 3em; display: none; background: rgba(0,0,0,0.65); }
+#grid-view::-webkit-scrollbar { width: 4px; }
+#grid-view::-webkit-scrollbar-thumb { background: #2a2a2a; }
+.grid-sections-wrap { display: flex; flex-direction: column; gap: 1em; }
+.grid-section-title {
+  font-family: 'Cinzel', serif; font-size: 0.45em; letter-spacing: 0.2em; margin-bottom: 0.5em;
+  border-bottom: 0.04em solid #1a1a1a; padding-bottom: 0.3em;
+}
+.grid-section-title.strength     { color: var(--str); }
+.grid-section-title.agility      { color: var(--agi); }
+.grid-section-title.intelligence { color: var(--int); }
+.grid-section-title.universal    { color: var(--uni); }
+.grid-heroes { display: grid; grid-template-columns: repeat(auto-fill, minmax(70px, 1fr)); gap: 3px; }
+.grid-hero { aspect-ratio: 3/4; position: relative; cursor: pointer; overflow: hidden; background: #050505; border: 1px solid #1a1a1a; transition: all 0.15s; }
+.grid-hero:hover { border-color: var(--dota-gold); transform: scale(1.05); z-index: 5; }
+.grid-hero.selected { border-color: var(--dota-gold); }
+.grid-hero img { width: 100%; height: 100%; object-fit: cover; object-position: center top; filter: brightness(0.65) saturate(0.7); transition: filter 0.2s; pointer-events: none; }
+.grid-hero:hover img, .grid-hero.selected img { filter: brightness(1) saturate(1); }
+.grid-hero .gh-name { position: absolute; bottom: 0; left: 0; right: 0; font-size: 7px; font-weight: 700; letter-spacing: 0.3px; text-align: center; padding: 2px 2px 3px; background: linear-gradient(transparent, rgba(0,0,0,0.95)); text-transform: uppercase; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #b0b0b0; }
+
+/* ══ CHALLENGE PANEL ══ */
+#challenge-panel {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  background: linear-gradient(to top, #040404 0%, rgba(10,10,10,0.99) 100%);
+  border-top: 0.04em solid var(--border-gray);
+  box-shadow: 0 -0.5em 2em rgba(0,0,0,0.95);
+  padding: 0.7em 1.5em 0.9em;
+  transform: translateY(100%);
+  transition: transform 0.4s cubic-bezier(0.16,1,0.3,1);
+  z-index: 100;
+}
+#challenge-panel.open { transform: translateY(0); }
+.panel-header { display: flex; align-items: center; gap: 0.5em; margin-bottom: 0.5em; border-bottom: 0.04em solid #1a1a1a; padding-bottom: 0.4em; }
+.panel-hero-img { width: 2em; height: 2em; object-fit: cover; object-position: center top; border: 0.04em solid var(--border-gray); flex-shrink: 0; }
+.panel-hero-name { font-family: 'Cinzel', serif; font-size: 0.65em; letter-spacing: 0.2em; color: var(--dota-gold); flex: 1; }
+.panel-meta { font-size: 0.38em; letter-spacing: 0.15em; color: #555; }
+.panel-close { margin-left: auto; background: transparent; border: none; color: #555; cursor: pointer; font-size: 0.55em; font-family: 'Cinzel', serif; transition: color 0.2s; }
+.panel-close:hover { color: #aaa; }
+.challenges-list { display: flex; gap: 0.4em; flex-wrap: wrap; }
+.challenge-item {
+  display: flex; align-items: flex-start; gap: 0.4em; padding: 0.5em 0.6em;
+  background: rgba(0,0,0,0.6); border: 0.04em solid #1a1a1a;
+  flex: 1; min-width: 8em; cursor: pointer; transition: all 0.2s;
+}
+.challenge-item:hover { border-color: #353535; background: rgba(255,255,255,0.025); }
+.challenge-item.picked { border-color: var(--dota-gold); background: rgba(193,179,130,0.05); }
+.challenge-num { font-family: 'Cinzel', serif; font-size: 0.7em; color: #2a2a2a; font-weight: 700; line-height: 1; flex-shrink: 0; }
+.challenge-item.picked .challenge-num { color: var(--dota-gold); }
+.challenge-text { font-size: 0.38em; color: #999; line-height: 1.5; letter-spacing: 0.03em; }
+
+/* ══════════════════════════════════════════
+   QUIZ OVERLAY
+══════════════════════════════════════════ */
+#quiz-overlay {
+  position: fixed; inset: 0; background: rgba(4,4,4,0.97);
+  z-index: 200; display: none; flex-direction: column; align-items: center; justify-content: center;
+}
+#quiz-overlay.open { display: flex; }
+.quiz-card {
+  position: relative;
+  background: var(--panel-bg);
+  border: 0.04em solid var(--border-gray);
+  box-shadow: inset 0 0 1.5em #000, 0 0 3em rgba(0,0,0,0.9);
+  padding: 1.2em 1.4em 1em;
+  width: 28em; max-width: 96vw;
+}
+.quiz-card::before, .quiz-card::after {
+  content: ''; position: absolute; width: 0.5em; height: 0.5em; border: 0.06em solid #7a1e1e;
+}
+.quiz-card::before { top: -0.03em; left: -0.03em; border-right: none; border-bottom: none; }
+.quiz-card::after  { bottom: -0.03em; right: -0.03em; border-left: none; border-top: none; }
+.quiz-title { font-family: 'Cinzel', serif; font-size: 0.75em; letter-spacing: 0.25em; font-weight: 700; color: var(--dota-gold); text-align: center; margin-bottom: 0.15em; text-shadow: 0 0 0.6em rgba(193,179,130,0.35); }
+.quiz-subtitle { text-align: center; font-size: 0.38em; letter-spacing: 0.15em; color: #444; margin-bottom: 0.9em; }
+.quiz-target { display: flex; flex-direction: column; align-items: center; margin-bottom: 0.7em; }
+.quiz-target img { width: 2.2em; height: 2.2em; object-fit: contain; border: 0.04em solid var(--border-gray); background: rgba(0,0,0,0.5); padding: 0.1em; }
+.quiz-item-name { font-family: 'Cinzel', serif; font-size: 0.42em; letter-spacing: 0.15em; color: var(--dota-gold); margin-top: 0.3em; text-align: center; }
+.quiz-components { display: flex; align-items: center; justify-content: center; gap: 0.2em; margin-bottom: 0.8em; }
+.quiz-comp { width: 1.8em; height: 1.8em; border: 0.04em solid var(--border-gray); background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.quiz-comp img { width: 100%; height: 100%; object-fit: contain; padding: 1px; }
+.quiz-comp.hidden-comp { border-color: var(--dota-gold); background: rgba(193,179,130,0.05); }
+.quiz-comp-mystery { font-family: 'Cinzel', serif; font-size: 0.9em; font-weight: 700; color: var(--dota-gold); opacity: 0.7; }
+.quiz-choices { display: grid; grid-template-columns: repeat(7,1fr); gap: 0.15em; margin-bottom: 0.7em; }
+.quiz-choice { aspect-ratio: 1; background: rgba(0,0,0,0.6); border: 0.04em solid #1a1a1a; cursor: pointer; transition: all 0.15s; padding: 0.1em; display: flex; align-items: center; justify-content: center; }
+.quiz-choice:hover:not(:disabled) { border-color: var(--border-gray); background: rgba(193,179,130,0.06); transform: scale(1.08); }
+.quiz-choice img { width: 100%; height: 100%; object-fit: contain; pointer-events: none; }
+.quiz-choice.correct { border-color: var(--agi); background: rgba(39,174,96,0.15); box-shadow: 0 0 0.3em rgba(39,174,96,0.3); }
+.quiz-choice.wrong   { border-color: rgba(162,43,43,0.5); background: rgba(162,43,43,0.08); opacity: 0.45; }
+.quiz-choice:disabled { cursor: default; }
+.quiz-hud { display: flex; align-items: center; justify-content: center; gap: 1.2em; font-size: 0.42em; }
+.quiz-hud-item { text-align: center; }
+.quiz-hud-label { color: #444; font-size: 0.8em; letter-spacing: 0.15em; }
+.quiz-hud-value { color: #b0b0b0; font-size: 1.2em; font-family: 'Cinzel', serif; }
+.quiz-streak-msg { color: var(--dota-gold); font-size: 0.55em; font-weight: 700; text-align: center; margin-top: 0.3em; text-shadow: 0 0 0.5em rgba(193,179,130,0.5); display: none; }
+.quiz-close { position: absolute; top: 0.4em; right: 0.5em; background: transparent; border: none; color: #555; font-size: 0.5em; cursor: pointer; transition: color 0.2s; font-family: 'Cinzel', serif; }
+.quiz-close:hover { color: #aaa; }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+══════════════════════════════════════════ */
+@media (max-width: 900px) {
+  body { font-size: 18px; align-items: flex-start; }
+  #screen-main { width: 100vw; padding: 0.3em; }
+  .main-content { grid-template-columns: 1fr; }
+  .right-col { display: none; }
+}
+@media (max-width: 600px) {
+  body { font-size: 13px; }
+  .hero-display { justify-content: center; gap: 0.4em; }
+  .hero-slot { width: 6em; height: 8.5em; }
+  .bottom-info { grid-template-columns: 1fr; }
+  .challenges-list { flex-direction: column; }
+  .challenge-item { min-width: unset; }
+  .quiz-choices { grid-template-columns: repeat(5,1fr); }
+}
+  </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     SCREEN: MAIN
+══════════════════════════════════════════ -->
+<div id="screen-main" class="screen active">
+
+  <header class="top-menu">
+    <div class="logo-text">DOTA 2</div>
+    <div class="menu-item active" onclick="goScreen('main')">TODAY</div>
+    <div class="menu-item" onclick="goScreen('play')">PLAY</div>
+    <div class="menu-item">WATCH</div>
+    <div class="menu-item" onclick="openQuiz()">LEARN</div>
+    <div class="menu-item">TEAM</div>
+  </header>
+
+  <div class="main-content">
+
+    <main class="panel-box">
+      <span class="close-btn">✖</span>
+
+      <div class="profile-top-bar">
+        <div class="user-meta">
+          <div class="avatar-img"></div>
+          <div>
+            <h1 class="nick-name">Cyborgmatt</h1>
+            <span class="sub-text">Main Menu</span>
+          </div>
+        </div>
+        <div class="xp-section">
+          <div class="wins-text">WINS: <span style="color:var(--dota-gold);font-size:1.6em">0</span></div>
+          <div class="xp-bar-bg"><div class="xp-bar-fill"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:0.4em;color:#555">
+            <span>LEVEL 1</span><span>XP 0 / 1000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="tabs-row">
+        <div class="tab-btn active">OVERVIEW</div>
+        <div class="tab-btn">GAME HISTORY</div>
+        <div class="tab-btn">HEROES PLAYED</div>
+      </div>
+
+      <div class="career-body">
+        <div class="section-label">MOST SUCCESSFUL HEROES</div>
+        <div class="hero-display">
+          <div class="hero-slot"></div>
+          <div class="hero-slot"></div>
+          <div class="hero-slot"></div>
+        </div>
+        <div class="bottom-info">
+          <div class="info-card">
+            <div class="section-label">COMMENDATIONS</div>
+            <div class="comm-icons">
+              <div class="comm-unit"><span class="comm-num">3</span>CHAT</div>
+              <div class="comm-unit"><span class="comm-num">2</span>HELP</div>
+              <div class="comm-unit"><span class="comm-num">2</span>SMILE</div>
+              <div class="comm-unit"><span class="comm-num">3</span>CROWN</div>
+            </div>
+          </div>
+          <div class="info-card">
+            <div class="section-label">MOST RECENT GAMES</div>
+            <div class="recent-row"><span>OGRE MAGI</span><span>05/24/12</span></div>
+            <div class="recent-row"><span>TREANT PROTECTOR</span><span>05/18/12</span></div>
+            <div class="recent-row"><span>NATURE'S PROPHET</span><span>04/30/12</span></div>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <aside class="right-col">
+      <div class="panel-box chat-box">
+        <div class="side-header">CHAT: LOBBY</div>
+        <div style="flex-grow:1;background:rgba(0,0,0,0.85);"></div>
+      </div>
+      <div class="panel-box friends-box">
+        <div class="side-header">FRIENDS</div>
+        <div class="friend-item">
+          <div class="f-ava"></div>
+          <div>Slendoor<span class="f-status">SPECTATING</span></div>
+        </div>
+        <div class="friend-item">
+          <div class="f-ava"></div>
+          <div>elicio<span class="f-status">MAIN MENU</span></div>
+        </div>
+        <div class="friend-item">
+          <div class="f-ava"></div>
+          <div>TOR-Merhaba<span class="f-status" style="color:var(--dota-blue)">ONLINE</span></div>
+        </div>
+      </div>
+    </aside>
+
+  </div>
+
+  <div class="main-bottom-bar">
+    <button class="main-action-btn primary" onclick="goScreen('play')">▶ PLAY DOTA</button>
+    <button class="main-action-btn" onclick="openQuiz()">? QUIZ</button>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     SCREEN: PLAY
+══════════════════════════════════════════ -->
+<div id="screen-play" class="screen">
+
+  <header class="top-menu">
+    <div class="logo-text">DOTA 2</div>
+    <div class="menu-item" onclick="goScreen('main')">TODAY</div>
+    <div class="menu-item active" onclick="goScreen('play')">PLAY</div>
+    <div class="menu-item">WATCH</div>
+    <div class="menu-item" onclick="openQuiz()">LEARN</div>
+    <div class="menu-item">TEAM</div>
+    <div class="menu-right">
+      <button class="view-tog-btn active" id="btn-carousel" onclick="setView('carousel')">
+        <svg viewBox="0 0 16 16"><rect x="1" y="4" width="4" height="8"/><rect x="6" y="2" width="5" height="12"/><rect x="12" y="4" width="3" height="8" opacity="0.4"/></svg>
+        CAROUSEL
+      </button>
+      <button class="view-tog-btn" id="btn-grid" onclick="setView('grid')">
+        <svg viewBox="0 0 16 16"><rect x="1" y="1" width="6" height="6"/><rect x="9" y="1" width="6" height="6"/><rect x="1" y="9" width="6" height="6"/><rect x="9" y="9" width="6" height="6"/></svg>
+        GRID
+      </button>
+    </div>
+  </header>
+
+  <div class="play-filter-bar">
+    <button class="filt-btn all active" onclick="setFilter('all')">ALL</button>
+    <button class="filt-btn str"        onclick="setFilter('strength')">⚔ STR</button>
+    <button class="filt-btn agi"        onclick="setFilter('agility')">🏹 AGI</button>
+    <button class="filt-btn int"        onclick="setFilter('intelligence')">✦ INT</button>
+    <button class="filt-btn uni"        onclick="setFilter('universal')">◈ UNI</button>
+    <div class="filt-sep"></div>
+    <button class="filt-btn"           onclick="setFilter('melee')">⚔ MELEE</button>
+    <button class="filt-btn"           onclick="setFilter('ranged')">⟶ RANGED</button>
+    <div class="filt-count" id="filter-count">126 HEROES</div>
+  </div>
+
+  <div class="play-main">
+    <div id="carousel-view">
+      <div class="carousel-track-wrap" id="track-wrap" style="touch-action:pan-x;">
+        <div class="carousel-track" id="carousel-track"></div>
+      </div>
+      <div class="scroll-hint" id="scroll-hint">SCROLL OR DRAG TO BROWSE</div>
+      <div class="pick-btn-wrap">
+        <button class="pick-btn" id="pick-btn" onclick="pickHero()">PICK HERO</button>
+      </div>
+    </div>
+    <div id="grid-view"></div>
+  </div>
+
+  <div id="challenge-panel">
+    <div class="panel-header">
+      <img class="panel-hero-img" id="panel-hero-img" src="" alt="">
+      <div>
+        <div class="panel-hero-name" id="panel-hero-name"></div>
+        <div class="panel-meta" id="panel-hero-meta"></div>
+      </div>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="challenges-list" id="challenges-list"></div>
+  </div>
+
+</div>
+
+
+<!-- ══════════════════════════════════════════
+     QUIZ OVERLAY
+══════════════════════════════════════════ -->
+<div id="quiz-overlay">
+  <div class="quiz-card">
+    <button class="quiz-close" onclick="closeQuiz()">✕</button>
+    <div class="quiz-title">THE SHOPKEEPER'S QUIZ</div>
+    <div class="quiz-subtitle">TEST YOUR DOTA 2 ITEM KNOWLEDGE</div>
+    <div class="quiz-target">
+      <img id="quiz-item-img" src="" alt="">
+      <div class="quiz-item-name" id="quiz-item-name"></div>
+    </div>
+    <div class="quiz-components" id="quiz-components"></div>
+    <div class="quiz-choices" id="quiz-choices"></div>
+    <div class="quiz-hud">
+      <div class="quiz-hud-item"><div class="quiz-hud-label">GUESSES LEFT</div><div class="quiz-hud-value" id="quiz-guesses">3</div></div>
+      <div class="quiz-hud-item"><div class="quiz-hud-label">SCORE</div><div class="quiz-hud-value" id="quiz-score">0</div></div>
+    </div>
+    <div class="quiz-streak-msg" id="quiz-streak"></div>
+  </div>
+</div>
+
+
+<script src="heroes.js"></script>
+<script src="challenges.js"></script>
+<script src="quiz.js"></script>
+<script src="app.js"></script>
+<script>
+function goScreen(name) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('screen-' + name).classList.add('active');
+  if (name === 'play') {
+    setTimeout(() => { buildCarousel(); updateCarousel(); }, 50);
+  }
+}
+
+(function(){
+  let done = false;
+  function hide() { if (done) return; done = true; const h = document.getElementById('scroll-hint'); if (h) h.classList.add('hidden'); }
+  document.addEventListener('wheel', hide, { passive:true });
+  document.addEventListener('touchmove', hide, { passive:true });
+  document.addEventListener('mousedown', hide);
+})();
+</script>
+</body>
+</html>

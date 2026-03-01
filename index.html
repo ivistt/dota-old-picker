@@ -113,6 +113,12 @@ body::before {
   border-top: 0.12em solid #ff2a2a;
   box-shadow: inset 0 0.2em 0.5em rgba(255,0,0,0.2);
 }
+.team-btn.active {
+  color: var(--dota-green);
+  background: rgba(168,207,92,0.07);
+  border-top: 0.12em solid var(--dota-green);
+  box-shadow: inset 0 0.2em 0.5em rgba(168,207,92,0.15);
+}
 /* view toggle pushed into menu right side */
 .menu-right { margin-left: auto; display: flex; align-items: center; padding-right: 0.4em; gap: 0.15em; flex-shrink: 0; }
 .view-tog-btn {
@@ -438,7 +444,7 @@ body::before {
     <div class="menu-item" onclick="goScreen('play')">PLAY</div>
     <div class="menu-item">WATCH</div>
     <div class="menu-item" onclick="openQuiz()">LEARN</div>
-    <div class="menu-item">TEAM</div>
+    <div class="menu-item team-btn" onclick="toggleSong()">TEAM</div>
   </header>
 
   <div class="main-content">
@@ -539,7 +545,7 @@ body::before {
     <div class="menu-item active" onclick="goScreen('play')">PLAY</div>
     <div class="menu-item">WATCH</div>
     <div class="menu-item" onclick="openQuiz()">LEARN</div>
-    <div class="menu-item">TEAM</div>
+    <div class="menu-item team-btn" onclick="toggleSong()">TEAM</div>
     <div class="menu-right">
       <button class="view-tog-btn active" id="btn-carousel" onclick="setView('carousel')">
         <svg viewBox="0 0 16 16"><rect x="1" y="4" width="4" height="8"/><rect x="6" y="2" width="5" height="12"/><rect x="12" y="4" width="3" height="8" opacity="0.4"/></svg>
@@ -615,11 +621,28 @@ body::before {
 </div>
 
 
+<audio id="bg-song" src="./song.mp3" loop></audio>
+
 <script src="heroes.js"></script>
 <script src="challenges.js"></script>
 <script src="quiz.js"></script>
 <script src="app.js"></script>
 <script>
+const _song = document.getElementById('bg-song');
+_song.volume = 0.6;
+let _songPlaying = false;
+function toggleSong() {
+  if (_songPlaying) {
+    _song.pause();
+    _songPlaying = false;
+    document.querySelectorAll('.team-btn').forEach(el => el.classList.remove('active'));
+  } else {
+    _song.play();
+    _songPlaying = true;
+    document.querySelectorAll('.team-btn').forEach(el => el.classList.add('active'));
+  }
+}
+
 function goScreen(name) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('screen-' + name).classList.add('active');
