@@ -31,6 +31,13 @@
         </svg>
         Grid View
       </button>
+      <button class="quiz-open-btn" onclick="openQuiz()">
+        <svg viewBox="0 0 16 16">
+          <circle cx="8" cy="8" r="6.5" stroke="currentColor" stroke-width="1.5" fill="none"/>
+          <text x="8" y="12" text-anchor="middle" font-size="9" font-weight="bold" fill="currentColor">?</text>
+        </svg>
+        <span>Quiz</span>
+      </button>
     </div>
   </header>
 
@@ -81,9 +88,39 @@
 
 </div>
 
+<!-- ── Shopkeeper's Quiz Overlay ── -->
+<div id="quiz-overlay">
+  <div class="quiz-card">
+    <button class="quiz-close" onclick="closeQuiz()">✕</button>
+    <div class="quiz-title">The Shopkeeper's Quiz</div>
+    <div class="quiz-subtitle">Test your Dota 2 item knowledge</div>
+
+    <div class="quiz-target">
+      <img id="quiz-item-img" src="" alt="">
+      <div class="quiz-item-name" id="quiz-item-name"></div>
+    </div>
+
+    <div class="quiz-components" id="quiz-components"></div>
+    <div class="quiz-choices" id="quiz-choices"></div>
+
+    <div class="quiz-hud">
+      <div class="quiz-hud-item">
+        <div class="quiz-hud-label">Guesses Left</div>
+        <div class="quiz-hud-value" id="quiz-guesses">3</div>
+      </div>
+      <div class="quiz-hud-item">
+        <div class="quiz-hud-label">Score</div>
+        <div class="quiz-hud-value" id="quiz-score">0</div>
+      </div>
+    </div>
+    <div class="quiz-streak-msg" id="quiz-streak"></div>
+  </div>
+</div>
+
 <!-- Data & Logic -->
 <script src="heroes.js"></script>
 <script src="challenges.js"></script>
+<script src="quiz.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
