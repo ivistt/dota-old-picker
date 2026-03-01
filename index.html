@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Dota 2 — Hero Challenge Picker</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+
+  <!-- ── Header ── -->
+  <header>
+    <div class="logo">Dota 2</div>
+    <h1>Hero Challenge</h1>
+    <div class="view-toggle">
+      <button class="toggle-btn active" id="btn-carousel" onclick="setView('carousel')">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="4" width="4" height="8"/>
+          <rect x="6" y="2" width="5" height="12"/>
+          <rect x="12" y="4" width="3" height="8" opacity="0.45"/>
+        </svg>
+        Carousel
+      </button>
+      <button class="toggle-btn" id="btn-grid" onclick="setView('grid')">
+        <svg viewBox="0 0 16 16">
+          <rect x="1" y="1" width="6" height="6"/>
+          <rect x="9" y="1" width="6" height="6"/>
+          <rect x="1" y="9" width="6" height="6"/>
+          <rect x="9" y="9" width="6" height="6"/>
+        </svg>
+        Grid View
+      </button>
+    </div>
+  </header>
+
+  <!-- ── Filter bar ── -->
+  <div class="filter-bar">
+    <button class="filter-btn all active" onclick="setFilter('all')">All</button>
+    <button class="filter-btn str" onclick="setFilter('strength')">⚔ Strength</button>
+    <button class="filter-btn agi" onclick="setFilter('agility')">🏹 Agility</button>
+    <button class="filter-btn int" onclick="setFilter('intelligence')">✦ Intelligence</button>
+    <button class="filter-btn uni" onclick="setFilter('universal')">◈ Universal</button>
+    <div class="filter-sep"></div>
+    <button class="filter-btn melee"  onclick="setFilter('melee')">⚔ Melee</button>
+    <button class="filter-btn ranged" onclick="setFilter('ranged')">⟶ Ranged</button>
+    <div class="filter-right" id="filter-count">126 heroes</div>
+  </div>
+
+  <!-- ── Main ── -->
+  <div class="main">
+
+    <!-- Carousel view -->
+    <div id="carousel-view">
+      <div class="carousel-track-wrap" id="track-wrap" style="touch-action: pan-x;">
+        <div class="carousel-track" id="carousel-track"></div>
+      </div>
+      <div class="scroll-hint" id="scroll-hint">scroll or drag to browse</div>
+      <div class="pick-btn-wrap">
+        <button class="pick-btn" id="pick-btn" onclick="pickHero()">Pick Hero</button>
+      </div>
+    </div>
+
+    <!-- Grid view -->
+    <div id="grid-view"></div>
+
+  </div>
+
+  <!-- ── Challenge Panel ── -->
+  <div id="challenge-panel">
+    <div class="panel-header">
+      <img class="panel-hero-img" id="panel-hero-img" src="" alt="">
+      <div>
+        <div class="panel-hero-name" id="panel-hero-name"></div>
+        <div class="panel-meta" id="panel-hero-meta"></div>
+      </div>
+      <button class="panel-close" onclick="closePanel()">✕</button>
+    </div>
+    <div class="challenges-list" id="challenges-list"></div>
+  </div>
+
+</div>
+
+<!-- Data & Logic -->
+<script src="heroes.js"></script>
+<script src="challenges.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
