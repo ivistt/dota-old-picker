@@ -526,3 +526,4 @@ window.addEventListener('resize', () => { recalcSpacing(); updateCarousel(); });
 recalcSpacing();
 buildCarousel();
 buildGrid();
+initLoader();
