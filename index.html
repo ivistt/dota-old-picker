@@ -429,6 +429,26 @@ body::before {
   .challenge-item { min-width: unset; }
   .quiz-choices { grid-template-columns: repeat(5,1fr); }
 }
+
+/* ══ ABILITY ICONS ══ */
+.card-abilities {
+  position: absolute;
+  bottom: 7%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 2px;
+  z-index: 6;
+  pointer-events: none;
+}
+.card-ability-icon {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border: 1px solid rgba(0,0,0,0.6);
+  background: #000;
+  flex-shrink: 0;
+}
   </style>
 </head>
 <body>
@@ -478,9 +498,9 @@ body::before {
       <div class="career-body">
         <div class="section-label">MOST SUCCESSFUL HEROES</div>
         <div class="hero-display">
-          <div class="hero-slot"></div>
-          <div class="hero-slot"></div>
-          <div class="hero-slot"></div>
+          <div class="hero-slot"><video src="./videos/pudge.mp4" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;object-position:center top;"></video></div>
+          <div class="hero-slot"><video src="./videos/pudge.mp4" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;object-position:center top;"></video></div>
+          <div class="hero-slot"><video src="./videos/pudge.mp4" autoplay loop muted playsinline style="width:100%;height:100%;object-fit:cover;object-position:center top;"></video></div>
         </div>
         <div class="bottom-info">
           <div class="info-card">
@@ -624,9 +644,10 @@ body::before {
 <audio id="bg-song" src="./song.mp3" loop></audio>
 
 <script src="heroes.js"></script>
+<script src="hero_abilities_map.js"></script>
 <script src="challenges.js"></script>
 <script src="quiz.js"></script>
-<script src="hero_media_map.js"></script>  <!-- ← должен быть ДО app.js -->
+<script src="hero_media_map.js"></script>
 <script src="app.js"></script>
 <script>
 const _song = document.getElementById('bg-song');
@@ -658,6 +679,66 @@ function goScreen(name) {
   document.addEventListener('wheel', hide, { passive:true });
   document.addEventListener('touchmove', hide, { passive:true });
   document.addEventListener('mousedown', hide);
+})();
+</script>
+
+<script>
+// ══════════════════════════════════════════════════════
+// RSS NEWS FEED — Dota 2
+// Цепочка CORS-прокси: пробуем по очереди
+// ══════════════════════════════════════════════════════
+(async function loadDotaNews() {
+  const RSS_URL = 'https://steamcommunity.com/games/dota2/rss/';
+  const PROXIES = [
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`,
+  ];
+
+  const wrap   = document.getElementById('news-feed-wrap');
+  const status = document.getElementById('news-feed-status');
+  if (!wrap) return;
+
+  let items = null;
+
+  for (const makeUrl of PROXIES) {
+    try {
+      const res = await fetch(makeUrl(RSS_URL), { signal: AbortSignal.timeout(7000) });
+      if (!res.ok) continue;
+      const text = await res.text();
+      const doc = new DOMParser().parseFromString(text, 'text/xml');
+      const els = doc.querySelectorAll('item');
+      if (els.length) { items = els; break; }
+    } catch(e) { continue; }
+  }
+
+  if (!items || !items.length) {
+    if (status) status.textContent = 'UNABLE TO LOAD NEWS';
+    return;
+  }
+
+  if (status) status.remove();
+
+  items.forEach(item => {
+    const title   = item.querySelector('title')?.textContent?.trim() || '';
+    const link    = item.querySelector('link')?.nextSibling?.textContent?.trim()
+                 || item.querySelector('link')?.textContent?.trim() || '#';
+    const pubDate = item.querySelector('pubDate')?.textContent || '';
+    const date    = pubDate ? new Date(pubDate) : null;
+    const dateStr = date && !isNaN(date)
+      ? date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).toUpperCase()
+      : '';
+
+    const a = document.createElement('a');
+    a.className = 'news-item';
+    a.href = link;
+    a.target = '_blank';
+    a.rel = 'noopener';
+    a.innerHTML = `
+      <div class="news-item-date">${dateStr}</div>
+      <div class="news-item-title">${title}</div>`;
+    wrap.appendChild(a);
+  });
 })();
 </script>
 </body>

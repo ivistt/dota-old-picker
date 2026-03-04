@@ -25,16 +25,12 @@ function createHeroMediaEl(hero) {
     vid.playsInline = true;
     vid.className = 'card-portrait';
     vid.setAttribute('playsinline', '');
-    // fallback на png если видео не грузится
     vid.onerror = function() {
       const fallback = document.createElement('img');
       fallback.src = heroImg(hero.key);
       fallback.alt = hero.name;
       fallback.className = 'card-portrait';
-      fallback.onerror = function() {
-        this.onerror = null;
-        this.src = makePlaceholder(hero.name, hero.attribute);
-      };
+      fallback.onerror = function() { this.onerror=null; this.src=makePlaceholder(hero.name,hero.attribute); };
       vid.parentNode && vid.parentNode.replaceChild(fallback, vid);
     };
     return vid;
@@ -46,26 +42,18 @@ function createHeroMediaEl(hero) {
     img.alt = hero.name;
     img.className = 'card-portrait';
     img.onerror = function() {
-      this.onerror = null;
-      this.src = heroImg(hero.key);
-      this.onerror = function() {
-        this.onerror = null;
-        this.src = makePlaceholder(hero.name, hero.attribute);
-      };
+      this.onerror = null; this.src = heroImg(hero.key);
+      this.onerror = function() { this.onerror=null; this.src=makePlaceholder(hero.name,hero.attribute); };
     };
     return img;
   }
 
-  // Нет медиа — обычный png
   const img = document.createElement('img');
   img.src = heroImg(hero.key);
   img.alt = hero.name;
   img.loading = 'lazy';
   img.className = 'card-portrait';
-  img.onerror = function() {
-    this.onerror = null;
-    this.src = makePlaceholder(hero.name, hero.attribute);
-  };
+  img.onerror = function() { this.onerror=null; this.src=makePlaceholder(hero.name,hero.attribute); };
   return img;
 }
 
@@ -173,12 +161,11 @@ function buildCarousel() {
     el.style.marginTop  = -(CARD_H_CUR / 2) + 'px';
     el.style.marginLeft = -(CARD_W_CUR / 2) + 'px';
 
-    const mediaEl = createHeroMediaEl(h);
-
     const inner = document.createElement('div');
     inner.className = 'card-inner';
 
-    // Hero portrait — gif/mp4/png, sits behind frame
+    // Hero portrait — gif/mp4/png
+    const mediaEl = createHeroMediaEl(h);
     inner.appendChild(mediaEl);
 
     // Frame overlay — 1.png covers the whole card on top
@@ -192,6 +179,21 @@ function buildCarousel() {
     inner.innerHTML += `
       <div class="card-name">${h.name}</div>
       <div class="attr-badge ${h.attribute}">${ATTR_ABBR[h.attribute]}</div>`;
+
+    // Abilities bar
+    const abilities = getHeroAbilities(h.key);
+    if (abilities.length) {
+      const abBar = document.createElement('div');
+      abBar.className = 'card-abilities';
+      abilities.forEach(src => {
+        const ab = document.createElement('img');
+        ab.src = src;
+        ab.className = 'card-ability-icon';
+        ab.draggable = false;
+        abBar.appendChild(ab);
+      });
+      inner.appendChild(abBar);
+    }
 
     el.appendChild(inner);
     el.addEventListener('click', () => { if (!dragMoved) onCardClick(i); });
@@ -223,7 +225,7 @@ function updateCarousel() {
     c.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rotY}deg) scale(${scale})`;
     c.style.opacity   = Math.max(0.1, bright + 0.1);
 
-    // Image/video brightness separate so card border stays normal
+    // Image brightness separate so card border stays normal
     const mediaChild = c.querySelector('img.card-portrait, video.card-portrait');
     if (mediaChild) mediaChild.style.filter = `brightness(${bright}) saturate(${0.7 + bright * 0.5})`;
 
