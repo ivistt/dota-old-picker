@@ -12,63 +12,6 @@ function heroImg(key) {
   return `${IMG_PATH}npc_dota_hero_${key}_png.png`;
 }
 
-// ── Создаёт <img>, <video> или <img>(gif) в зависимости от наличия медиа ──
-function createHeroMediaEl(hero) {
-  const media = getHeroMedia(hero.key);
-
-  if (media && media.type === 'mp4') {
-    const vid = document.createElement('video');
-    vid.src = media.file;
-    vid.autoplay = true;
-    vid.loop = true;
-    vid.muted = true;
-    vid.playsInline = true;
-    vid.className = 'card-portrait';
-    vid.setAttribute('playsinline', '');
-    // fallback на png если видео не грузится
-    vid.onerror = function() {
-      const fallback = document.createElement('img');
-      fallback.src = heroImg(hero.key);
-      fallback.alt = hero.name;
-      fallback.className = 'card-portrait';
-      fallback.onerror = function() {
-        this.onerror = null;
-        this.src = makePlaceholder(hero.name, hero.attribute);
-      };
-      vid.parentNode && vid.parentNode.replaceChild(fallback, vid);
-    };
-    return vid;
-  }
-
-  if (media && media.type === 'gif') {
-    const img = document.createElement('img');
-    img.src = media.file;
-    img.alt = hero.name;
-    img.className = 'card-portrait';
-    img.onerror = function() {
-      this.onerror = null;
-      this.src = heroImg(hero.key);
-      this.onerror = function() {
-        this.onerror = null;
-        this.src = makePlaceholder(hero.name, hero.attribute);
-      };
-    };
-    return img;
-  }
-
-  // Нет медиа — обычный png
-  const img = document.createElement('img');
-  img.src = heroImg(hero.key);
-  img.alt = hero.name;
-  img.loading = 'lazy';
-  img.className = 'card-portrait';
-  img.onerror = function() {
-    this.onerror = null;
-    this.src = makePlaceholder(hero.name, hero.attribute);
-  };
-  return img;
-}
-
 function makePlaceholder(name, attribute) {
   const colors = { strength:'#c0392b', agility:'#27ae60', intelligence:'#2980b9', universal:'#8e44ad' };
   const c = document.createElement('canvas');
@@ -173,13 +116,21 @@ function buildCarousel() {
     el.style.marginTop  = -(CARD_H_CUR / 2) + 'px';
     el.style.marginLeft = -(CARD_W_CUR / 2) + 'px';
 
-    const mediaEl = createHeroMediaEl(h);
+    const img = document.createElement('img');
+    img.src = heroImg(h.key);
+    img.alt = h.name;
+    img.loading = 'lazy';
+    img.onerror = function() {
+      this.onerror = null;
+      this.src = makePlaceholder(h.name, h.attribute);
+    };
 
     const inner = document.createElement('div');
     inner.className = 'card-inner';
 
-    // Hero portrait — gif/mp4/png, sits behind frame
-    inner.appendChild(mediaEl);
+    // Hero portrait — fills the card area, sits behind frame
+    img.className = 'card-portrait';
+    inner.appendChild(img);
 
     // Frame overlay — 1.png covers the whole card on top
     const frame = document.createElement('img');
@@ -223,9 +174,9 @@ function updateCarousel() {
     c.style.transform = `translateX(${tx}px) translateZ(${tz}px) rotateY(${rotY}deg) scale(${scale})`;
     c.style.opacity   = Math.max(0.1, bright + 0.1);
 
-    // Image/video brightness separate so card border stays normal
-    const mediaChild = c.querySelector('img.card-portrait, video.card-portrait');
-    if (mediaChild) mediaChild.style.filter = `brightness(${bright}) saturate(${0.7 + bright * 0.5})`;
+    // Image brightness separate so card border stays normal
+    const imgEl = c.querySelector('img');
+    if (imgEl) imgEl.style.filter = `brightness(${bright}) saturate(${0.7 + bright * 0.5})`;
 
     const diff = Math.abs(i - centerI);
     c.classList.toggle('focused', diff === 0);
